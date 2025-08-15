@@ -180,14 +180,10 @@ async function deleteFile(fileId, filename) {
     if (!confirm(`Are you sure you want to delete "${filename}"?`)) {
         return;
     }
-    
     try {
-        const response = await fetch(`${API_BASE}/delete/${fileId}`, {
-            method: 'DELETE',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ password: currentPassword })
+        const response = await fetch(`${API_BASE}/delete/${fileId}?password=${encodeURIComponent(currentPassword)}`, {
+            method: 'DELETE'
         });
-        
         if (response.ok) {
             showStatus(`Deleted "${filename}"`);
             loadFiles(); // Refresh the list
