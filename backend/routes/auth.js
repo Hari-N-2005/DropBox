@@ -4,8 +4,8 @@ const router = express.Router();
 const authenticatePassword = (req, res, next) => {
   // Support both JSON and form-data
   const password = req.body.password || req.body['password'];
-  console.log('Env password:', process.env.APP_PASSWORD, 'Request password:', password);
-  console.log('Full req.body:', req.body);     //dygdfdf
+  console.log('Attempted authentication');
+  console.log('Entered password:', password);
   if (!password || password !== process.env.APP_PASSWORD) {
     return res.status(401).json({ error: 'Invalid password' });
   }

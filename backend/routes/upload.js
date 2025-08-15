@@ -20,7 +20,6 @@ const upload = multer({
 });
 
 router.post('/', upload.single('file'), authenticatePassword, async (req, res) => {
-  console.log('Full req.body:', req.body);    //added invalid password fix
   try {
     if (!req.file) {
       return res.status(400).json({ error: 'No file uploaded' });
@@ -44,6 +43,8 @@ router.post('/', upload.single('file'), authenticatePassword, async (req, res) =
       media: media,
       fields: 'id, name, size, createdTime'
     });
+
+    console.log(`File was uploaded in the backend: ${req.file.originalname} (Google Drive ID: ${driveResponse.data.id})`);
 
     // Save metadata to database
     const fileRecord = new File({
