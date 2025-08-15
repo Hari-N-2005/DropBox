@@ -11,18 +11,11 @@ const router = express.Router();
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: {
-    fileSize: 50 * 1024 * 1024 // 50MB limit
+    fileSize: 100 * 1024 * 1024 // 100MB limit
   },
+  // Accept any file type
   fileFilter: (req, file, cb) => {
-    // Optional: Add file type restrictions
-    const allowedTypes = /jpeg|jpg|png|gif|pdf|doc|docx|txt|zip/;
-    const extname = allowedTypes.test(file.originalname.toLowerCase());
-    
-    if (extname) {
-      return cb(null, true);
-    } else {
-      cb(new Error('File type not allowed'));
-    }
+    cb(null, true);
   }
 });
 
