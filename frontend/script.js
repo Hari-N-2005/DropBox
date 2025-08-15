@@ -124,30 +124,39 @@ function displayFiles(files) {
             </div>
             <div class="flex space-x-2">
                 <button 
-                    onclick="downloadFile('${file._id}', '${file.filename}')"
-                    class="bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600"
+                    class="bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600 download-btn"
+                    data-file-id="${file._id}"
+                    data-filename="${file.filename}"
                 >
                     Download
                 </button>
                 <button 
-                    onclick="deleteFile('${file._id}', '${file.filename}')"
-                    class="bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600"
+                    class="bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600 delete-btn"
+                    data-file-id="${file._id}"
+                    data-filename="${file.filename}"
                 >
                     Delete
                 </button>
             </div>
         </div>
     `).join('');
+
+    // Add event listeners for download and delete buttons
+    document.querySelectorAll('.download-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            downloadFile(this.getAttribute('data-file-id'), this.getAttribute('data-filename'));
+        });
+    });
+    document.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            deleteFile(this.getAttribute('data-file-id'), this.getAttribute('data-filename'));
+        });
+    });
 }
 
 async function downloadFile(fileId, filename) {
     try {
-        const response = await fetch(`${API_BASE}/files/download/${fileId}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ password: currentPassword })
-        });
-        
+        const response = await fetch(`${API_BASE}/files/download/${fileId}?password=${encodeURIComponent(currentPassword)}`);
         if (response.ok) {
             const blob = await response.blob();
             const url = window.URL.createObjectURL(blob);
