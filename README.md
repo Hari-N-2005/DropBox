@@ -1,4 +1,4 @@
-# Personal File Transfer Web App
+# Private DropBox
 
 ## Overview
 A secure, password-protected web application to upload files from any device directly to your Google Drive, along with metadata stored in a MongoDB cloud database. Your private Dropbox powered by Google Drive.
