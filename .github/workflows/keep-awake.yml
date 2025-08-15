@@ -4,6 +4,7 @@ on:
   schedule:
     # Runs every 13 minutes
     - cron: '*/13 * * * *'
+  workflow_dispatch:
 
 jobs:
   ping:
