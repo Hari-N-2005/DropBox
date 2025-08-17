@@ -13,42 +13,74 @@ function showStatus(message, isError = false) {
     }, 5000);
 }
 
+// Uploading indicator
+function showUploadingIndicator(show) {
+    const indicator = document.getElementById('uploadingIndicator');
+    if (show) {
+        indicator.classList.remove('hidden');
+    } else {
+        indicator.classList.add('hidden');
+    }
+}
+
+function setUploadLabel(text) {
+    const label = document.getElementById('uploadLabel');
+    if (label) label.textContent = text;
+}
+
+function setUploadButton(text, disabled) {
+    const btn = document.getElementById('uploadBtn');
+    if (btn) {
+        btn.textContent = text;
+        btn.disabled = !!disabled;
+    }
+}
+
 // Upload functionality
 if (document.getElementById('uploadForm')) {
     document.getElementById('uploadForm').addEventListener('submit', async (e) => {
         e.preventDefault();
-        
         const password = document.getElementById('password').value;
         const fileInput = document.getElementById('fileInput');
-        const file = fileInput.files[0];
-        
-        if (!file) {
-            showStatus('Please select a file', true);
+        const files = fileInput.files;
+        if (!files || files.length === 0) {
+            showStatus('Please select at least one file', true);
             return;
         }
-        
+        if (files.length > 10) {
+            showStatus('You can upload a maximum of 10 files at once.', true);
+            return;
+        }
         const formData = new FormData();
-        formData.append('file', file);
+        for (const file of files) {
+            formData.append('file', file);
+        }
         formData.append('password', password);
-        
-        try {
-            const response = await fetch(`${API_BASE}/upload`, {
-                method: 'POST',
-                body: formData
-            });
-            
-            const result = await response.json();
-            
-            if (response.ok) {
-                showStatus(`File "${file.name}" uploaded successfully!`);
+
+        setUploadButton('Uploading...', true);
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', `${API_BASE}/upload`, true);
+        xhr.onload = function() {
+            let result;
+            try {
+                result = JSON.parse(xhr.responseText);
+            } catch {
+                result = { error: 'Upload failed' };
+            }
+            if (xhr.status === 200) {
+                showStatus(`Uploaded ${files.length} file(s) successfully!`);
                 fileInput.value = '';
                 document.getElementById('password').value = '';
             } else {
                 showStatus(result.error || 'Upload failed', true);
             }
-        } catch (error) {
+            setUploadButton('Upload File', false);
+        };
+        xhr.onerror = function() {
             showStatus('Network error during upload', true);
-        }
+            setUploadButton('Upload File', false);
+        };
+        xhr.send(formData);
     });
 }
 

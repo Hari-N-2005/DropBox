@@ -42,6 +42,10 @@ node_modules/
 jspm_packages/
 .env
 
+# Learning files
+DOCUMENTATION.md
+LEARNING.md
+
 # Snowpack dependency directory (https://snowpack.dev/)
 web_modules/
 
