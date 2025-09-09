@@ -1,5 +1,5 @@
 const API_BASE = '/api';
-let currentPassword = '';
+let downloadPassword = '';
 
 // Show status messages
 function showStatus(message, isError = false) {
@@ -92,30 +92,14 @@ if (document.getElementById('authBtn')) {
 
 async function authenticateAndLoadFiles() {
     const password = document.getElementById('authPassword').value;
-    
     if (!password) {
-        showStatus('Please enter password', true);
+        showStatus('Please enter download password', true);
         return;
     }
-    
-    try {
-        const response = await fetch(`${API_BASE}/auth/verify`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ password })
-        });
-        
-        if (response.ok) {
-            currentPassword = password;
-            document.getElementById('authSection').classList.add('hidden');
-            document.getElementById('filesSection').classList.remove('hidden');
-            loadFiles();
-        } else {
-            showStatus('Invalid password', true);
-        }
-    } catch (error) {
-        showStatus('Authentication failed', true);
-    }
+    downloadPassword = password;
+    // Hide files section until password is validated, keep auth section visible
+    document.getElementById('filesSection').classList.add('hidden');
+    loadFiles();
 }
 
 async function loadFiles() {
@@ -123,15 +107,17 @@ async function loadFiles() {
         const response = await fetch(`${API_BASE}/files/list`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ password: currentPassword })
+            body: JSON.stringify({ password: downloadPassword })
         });
-        
         const result = await response.json();
-        
         if (response.ok) {
+            document.getElementById('authSection').classList.add('hidden');
+            document.getElementById('filesSection').classList.remove('hidden');
             displayFiles(result.files);
         } else {
-            showStatus('Failed to load files', true);
+            showStatus(result.error || 'Failed to load files', true);
+            document.getElementById('filesSection').classList.add('hidden');
+            document.getElementById('authSection').classList.remove('hidden');
         }
     } catch (error) {
         showStatus('Network error loading files', true);
@@ -188,7 +174,7 @@ function displayFiles(files) {
 
 async function downloadFile(fileId, filename) {
     try {
-        const response = await fetch(`${API_BASE}/files/download/${fileId}?password=${encodeURIComponent(currentPassword)}`);
+        const response = await fetch(`${API_BASE}/files/download/${fileId}?password=${encodeURIComponent(downloadPassword)}`);
         if (response.ok) {
             const blob = await response.blob();
             const url = window.URL.createObjectURL(blob);
@@ -213,7 +199,7 @@ async function deleteFile(fileId, filename) {
         return;
     }
     try {
-        const response = await fetch(`${API_BASE}/delete/${fileId}?password=${encodeURIComponent(currentPassword)}`, {
+        const response = await fetch(`${API_BASE}/delete/${fileId}?password=${encodeURIComponent(downloadPassword)}`, {
             method: 'DELETE'
         });
         if (response.ok) {

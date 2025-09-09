@@ -7,10 +7,13 @@ const router = express.Router();
 // Get list of files
 router.post('/list', async (req, res) => {
   try {
+    const password = req.body.password;
+    if (!password || password !== process.env.DOWNLOAD_PASSWORD) {
+      return res.status(401).json({ error: 'Invalid password' });
+    }
     const files = await File.find()
       .sort({ uploadedAt: -1 })
       .select('filename size uploadedAt _id');
-    
     res.json({ files });
   } catch (error) {
     console.error('List files error:', error);
